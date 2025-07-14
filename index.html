@@ -5,16 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>互動式幾何教學 - 三角形與畢氏定理</title>
     <style>
-        /* --- 全域樣式 --- */
+        /* --- 全域樣式與變數 --- */
         :root {
-            --primary-color: #007bff;
-            --secondary-color: #6c757d;
-            --background-color: #f8f9fa;
+            --primary-color: #0072e5; /* A slightly richer blue */
+            --secondary-color: #5a6268;
+            --background-color: #f4f7f9;
             --surface-color: #ffffff;
             --text-color: #212529;
             --success-color: #28a745;
             --danger-color: #dc3545;
-            --font-family: 'Segoe UI', 'Microsoft JhengHei', 'PingFang TC', sans-serif;
+            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft JhengHei', 'PingFang TC', sans-serif;
+            --border-radius: 8px;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.07);
+            --shadow-md: 0 4px 8px rgba(0,0,0,0.1);
         }
 
         body {
@@ -23,89 +26,109 @@
             color: var(--text-color);
             margin: 0;
             padding: 0;
-            line-height: 1.6;
+            line-height: 1.7;
         }
 
         /* --- 主要佈局 --- */
         .container {
             max-width: 1200px;
-            margin: 0 auto;
+            margin: 20px auto;
             padding: 20px;
         }
 
         header {
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color), #0056b3);
             color: white;
-            padding: 1rem;
+            padding: 1.5rem 1rem;
             text-align: center;
-            border-radius: 8px 8px 0 0;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            box-shadow: var(--shadow-md);
         }
 
         header h1 {
             margin: 0;
-            font-size: 2rem;
+            font-size: 2.2rem;
+            font-weight: 600;
         }
 
         nav {
             display: flex;
             justify-content: center;
-            background-color: #f1f1f1;
-            padding: 10px 0;
-            border-bottom: 2px solid #ddd;
+            background-color: var(--surface-color);
+            padding: 12px 0;
+            border-bottom: 1px solid #ddd;
+            box-shadow: var(--shadow-sm);
         }
 
         nav button {
-            background-color: var(--surface-color);
-            color: var(--primary-color);
-            border: 2px solid var(--primary-color);
-            padding: 10px 20px;
+            background-color: transparent;
+            color: var(--secondary-color);
+            border: none;
+            padding: 12px 24px;
             margin: 0 10px;
             cursor: pointer;
             border-radius: 25px;
-            font-size: 1rem;
-            font-weight: bold;
+            font-size: 1.1rem;
+            font-weight: 600;
             transition: all 0.3s ease;
+            position: relative;
         }
 
-        nav button:hover {
+        nav button:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 3px;
             background-color: var(--primary-color);
-            color: white;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: width 0.3s ease;
         }
-
-        nav button.active {
-            background-color: var(--primary-color);
-            color: white;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        
+        nav button:hover, nav button.active {
+            color: var(--primary-color);
+        }
+        
+        nav button.active:after {
+            width: 80%;
         }
 
         main {
             background-color: var(--surface-color);
-            padding: 20px;
-            border-radius: 0 0 8px 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            padding: 25px;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            box-shadow: var(--shadow-md);
         }
         
         .module {
-            display: none; /* 預設隱藏 */
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         
         .module.active {
-            display: block; /* 顯示當前活動的模組 */
+            display: block;
         }
 
         .content-wrapper {
             display: flex;
-            gap: 20px;
+            gap: 30px;
             margin-top: 20px;
         }
         
         .visualization-area {
             flex: 1;
-            min-height: 400px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
+            min-height: 420px;
+            border: 1px solid #e0e0e0;
+            border-radius: var(--border-radius);
             position: relative;
             overflow: hidden;
+            background-color: #fafafa;
         }
 
         .visualization-area svg {
@@ -115,194 +138,190 @@
 
         .explanation-area {
             flex: 1;
-            padding-left: 20px;
-            border-left: 2px solid #eee;
         }
 
         .explanation-area h3 {
+            font-size: 1.5rem;
             color: var(--primary-color);
-            border-bottom: 2px solid var(--primary-color);
-            padding-bottom: 5px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+            margin-top: 0;
         }
         
         .explanation-area p, .explanation-area ul {
             font-size: 1.1rem;
+            color: #333;
+        }
+        
+        .explanation-area ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .explanation-area li {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 8px;
         }
         
         .explanation-area code {
             background-color: #e9ecef;
-            padding: 3px 6px;
+            padding: 4px 8px;
             border-radius: 4px;
-            font-family: 'Courier New', Courier, monospace;
+            font-family: 'SFMono-Regular', Consolas, 'Courier New', monospace;
             font-size: 1.1rem;
             font-weight: bold;
+            color: var(--primary-color);
         }
-
+        
+        .formula {
+            background-color: #e9f5ff;
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 4px;
+        }
+        .formula code {
+            background-color: transparent;
+        }
+        
         /* --- 練習區塊 --- */
         #practice-section {
-            margin-top: 30px;
-            padding: 20px;
-            border: 2px dashed var(--secondary-color);
-            border-radius: 8px;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #e9ecef;
         }
         
         #practice-section h2 {
             margin-top: 0;
             color: var(--secondary-color);
+            text-align: center;
+            font-size: 1.8rem;
         }
 
         .practice-controls {
             display: flex;
             align-items: center;
-            margin-bottom: 20px;
+            justify-content: center;
+            margin-bottom: 25px;
+            gap: 15px;
         }
         
         #practice-toggle-label {
             font-size: 1.2rem;
-            margin-right: 15px;
+            font-weight: 500;
         }
 
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 34px;
-        }
-
-        .switch input { 
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background-color: var(--primary-color);
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(26px);
-        }
+        .switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(26px); }
         
         #practice-area {
-            display: none; /* 預設隱藏練習題 */
-            border-top: 1px solid #ddd;
-            padding-top: 20px;
+            display: none;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .quiz-set {
+            display: none;
+        }
+        .quiz-set.active {
+            display: block;
         }
         
         .question-block {
             margin-bottom: 25px;
-            padding: 15px;
+            padding: 20px;
             border: 1px solid #e0e0e0;
-            border-radius: 8px;
+            border-radius: var(--border-radius);
+            background: #fff;
         }
         
         .question-block p {
-            font-weight: bold;
+            font-weight: 600;
+            font-size: 1.15rem;
+            margin-top: 0;
         }
 
         .question-options button {
             margin: 5px;
-            padding: 8px 15px;
-            border-radius: 5px;
+            padding: 10px 18px;
+            border-radius: 20px;
             border: 1px solid var(--secondary-color);
             background-color: white;
             cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+        .question-options button:hover {
+            background-color: #e9ecef;
+            border-color: var(--primary-color);
+        }
+        .question-options button.selected.correct {
+            background-color: var(--success-color);
+            color: white;
+            border-color: var(--success-color);
+        }
+        .question-options button.selected.incorrect {
+            background-color: var(--danger-color);
+            color: white;
+            border-color: var(--danger-color);
         }
 
         .feedback {
-            margin-top: 10px;
+            margin-top: 15px;
             font-weight: bold;
-            padding: 10px;
-            border-radius: 5px;
+            padding: 12px;
+            border-radius: var(--border-radius);
+            display: none; /* Initially hidden */
         }
         
         .feedback.correct {
-            color: var(--success-color);
+            color: #155724;
             background-color: #d4edda;
+            display: block;
         }
         
         .feedback.incorrect {
-            color: var(--danger-color);
+            color: #721c24;
             background-color: #f8d7da;
+            display: block;
         }
         
         /* --- SVG 元素樣式 --- */
-        .draggable-point {
-            cursor: move;
-            fill: var(--primary-color);
-            stroke: white;
-            stroke-width: 2px;
-        }
-
-        .triangle-shape {
-            fill: rgba(0, 123, 255, 0.2);
-            stroke: var(--primary-color);
-            stroke-width: 2;
-        }
-
-        .angle-arc {
-            fill: rgba(255, 193, 7, 0.5);
-            stroke: #ffc107;
-            stroke-width: 1.5;
-        }
-
-        .vertex-label {
-            font-size: 16px;
-            font-weight: bold;
-            fill: #333;
-            pointer-events: none; /* 讓標籤不會干擾拖曳 */
-        }
+        .draggable-point { cursor: move; fill: var(--primary-color); stroke: white; stroke-width: 2px; transition: r 0.2s; }
+        .draggable-point:hover { r: 10; }
+        .triangle-shape { fill: rgba(0, 114, 229, 0.2); stroke: var(--primary-color); stroke-width: 2.5; }
+        .angle-arc { stroke-width: 1.5; opacity: 0.8; }
+        .vertex-label { font-size: 18px; font-weight: bold; fill: #333; pointer-events: none; }
+        #pythagorean-svg .square-a { fill: rgba(220, 53, 69, 0.4); stroke: var(--danger-color); }
+        #pythagorean-svg .square-b { fill: rgba(40, 167, 69, 0.4); stroke: var(--success-color); }
+        #pythagorean-svg .square-c { fill: rgba(0, 123, 255, 0.4); stroke: var(--primary-color); }
+        #pythagorean-svg .square-label { font-size: 16px; font-weight: bold; fill: #333; text-anchor: middle; pointer-events: none; }
+        #pythagorean-svg .right-angle-symbol { stroke: var(--secondary-color); stroke-width: 2.5; fill: none; }
         
-        #pythagorean-svg .square-a { fill: rgba(220, 53, 69, 0.5); stroke: var(--danger-color); }
-        #pythagorean-svg .square-b { fill: rgba(40, 167, 69, 0.5); stroke: var(--success-color); }
-        #pythagorean-svg .square-c { fill: rgba(0, 123, 255, 0.5); stroke: var(--primary-color); }
-        #pythagorean-svg .right-angle-symbol {
-            stroke: var(--secondary-color);
-            stroke-width: 2;
-            fill: none;
+        /* --- 頁尾 --- */
+        .site-footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            color: var(--secondary-color);
+            font-size: 0.95rem;
         }
-        
+
         /* --- 響應式設計 --- */
         @media (max-width: 768px) {
-            .content-wrapper {
-                flex-direction: column;
-            }
-            .explanation-area {
-                border-left: none;
-                padding-left: 0;
-                border-top: 2px solid #eee;
-                padding-top: 20px;
-            }
-            nav {
-                flex-direction: column;
-            }
-            nav button {
-                margin: 5px 10px;
-            }
+            .content-wrapper { flex-direction: column; }
+            .explanation-area { padding-top: 20px; }
+            nav { flex-direction: column; }
+            nav button { margin: 5px 10px; }
         }
     </style>
 </head>
@@ -332,10 +351,10 @@
                             <li>頂點 B 角度 (∠B): <code id="angle-b"></code></li>
                             <li>頂點 C 角度 (∠C): <code id="angle-c"></code></li>
                         </ul>
-                        <p><strong>角度總和:</strong></p>
-                        <p><code id="angle-sum-text">∠A + ∠B + ∠C = 180°</code></p>
+                        <div class="formula">
+                            <span id="angle-sum-text">∠A + ∠B + ∠C = <strong>180°</strong></span>
+                        </div>
                         <p>無論你如何改變三角形的形狀，三個內角的總和永遠是 <strong>180 度</strong>。</p>
-                        <button id="unfold-angles-btn">展開三角形角度</button>
                     </div>
                 </div>
             </section>
@@ -350,19 +369,19 @@
                         <h3>探索畢氏定理</h3>
                         <p>這是一個直角三角形。拖曳頂點 A (垂直移動) 或 B (水平移動) 來改變兩股的長度。</p>
                         <ul>
-                            <li>股長 a (紅色邊): <code id="side-a"></code></li>
-                            <li>股長 b (綠色邊): <code id="side-b"></code></li>
-                            <li>斜邊 c (藍色邊): <code id="side-c"></code></li>
+                            <li>股長 a (紅邊): <code id="side-a"></code></li>
+                            <li>股長 b (綠邊): <code id="side-b"></code></li>
+                            <li>斜邊 c (藍邊): <code id="side-c"></code></li>
                         </ul>
                         <p><strong>面積關係:</strong></p>
                         <ul>
                             <li>a² (紅色正方形面積): <code id="area-a"></code></li>
                             <li>b² (綠色正方形面積): <code id="area-b"></code></li>
-                            <li><strong>a² + b² = <code id="area-a-plus-b"></code></strong></li>
-                        </ul>
-                        <ul>
                             <li>c² (藍色正方形面積): <code id="area-c"></code></li>
                         </ul>
+                        <div class="formula">
+                           <code>a² + b²</code> = <code id="area-a-plus-b"></code> = <code>c²</code>
+                        </div>
                         <p>你會發現，<code id="pythagorean-equation">a² + b² = c²</code> 恆成立。這就是畢氏定理（或稱勾股定理）。</p>
                     </div>
                 </div>
@@ -372,53 +391,82 @@
             <section id="practice-section">
                 <h2>練習與測驗</h2>
                 <div class="practice-controls">
-                    <span id="practice-toggle-label">切換至練習模式</span>
+                    <span id="practice-toggle-label">開啟練習模式</span>
                     <label class="switch">
                         <input type="checkbox" id="practice-toggle">
                         <span class="slider"></span>
                     </label>
                 </div>
                 <div id="practice-area">
-                    <!-- 問題會動態插入此處 -->
-                    <div class="question-block">
-                        <p>問題 1: 下列哪一組數字可以構成一個直角三角形的三邊長？</p>
-                        <div class="question-options" id="q1-options">
-                            <button data-answer="correct">3, 4, 5</button>
-                            <button data-answer="incorrect">5, 6, 7</button>
-                            <button data-answer="incorrect">1, 2, 3</button>
+                    <!-- 內角和測驗題組 -->
+                    <div id="angle-sum-quiz" class="quiz-set active">
+                        <div class="question-block">
+                            <p>問題 1: 一個三角形的兩個內角分別是 70° 和 30°，請問第三個角是幾度？</p>
+                            <div class="question-options" id="q_as1-options">
+                                <button data-answer="incorrect">70°</button>
+                                <button data-answer="correct">80°</button>
+                                <button data-answer="incorrect">90°</button>
+                            </div>
+                            <div class="feedback" id="q_as1-feedback"></div>
                         </div>
-                        <div class="feedback" id="q1-feedback"></div>
+                        <div class="question-block">
+                            <p>問題 2: 下列哪一組角度<b>不可能</b>是同一個三角形的內角？</p>
+                            <div class="question-options" id="q_as2-options">
+                                <button data-answer="incorrect">90°, 45°, 45°</button>
+                                <button data-answer="incorrect">60°, 60°, 60°</button>
+                                <button data-answer="correct">80°, 70°, 40°</button>
+                            </div>
+                            <div class="feedback" id="q_as2-feedback"></div>
+                        </div>
                     </div>
-                    
-                    <div class="question-block">
-                        <p>問題 2: 一個三角形的三個內角分別是 50°, 60°, 80°，這是可能的嗎？</p>
-                        <div class="question-options" id="q2-options">
-                            <button data-answer="incorrect">是</button>
-                            <button data-answer="correct">否</button>
+
+                    <!-- 畢氏定理測驗題組 -->
+                    <div id="pythagorean-quiz" class="quiz-set">
+                        <div class="question-block">
+                            <p>問題 1: 下列哪一組數字可以構成一個直角三角形的三邊長？</p>
+                            <div class="question-options" id="q_py1-options">
+                                <button data-answer="correct">3, 4, 5</button>
+                                <button data-answer="incorrect">5, 6, 7</button>
+                                <button data-answer="incorrect">1, 2, 3</button>
+                            </div>
+                            <div class="feedback" id="q_py1-feedback"></div>
                         </div>
-                        <div class="feedback" id="q2-feedback"></div>
+                        <div class="question-block">
+                            <p>問題 2: 一個直角三角形的兩股長為 6 和 8，請問斜邊長為多少？</p>
+                            <div class="question-options" id="q_py2-options">
+                                <button data-answer="incorrect">9</button>
+                                <button data-answer="correct">10</button>
+                                <button data-answer="incorrect">12</button>
+                            </div>
+                            <div class="feedback" id="q_py2-feedback"></div>
+                        </div>
                     </div>
                 </div>
             </section>
-
         </main>
     </div>
 
+    <footer class="site-footer">
+        <p>Patricia Liu 生成式AI教材</p>
+    </footer>
+
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-
-        // --- 全域變數和元素選擇器 ---
         const modules = {
             angleSum: document.getElementById('angle-sum-module'),
             pythagorean: document.getElementById('pythagorean-module')
         };
-        
         const navButtons = {
             angleSum: document.getElementById('btn-angle-sum'),
             pythagorean: document.getElementById('btn-pythagorean')
         };
+        const practiceToggle = document.getElementById('practice-toggle');
+        const practiceArea = document.getElementById('practice-area');
+        const practiceToggleLabel = document.getElementById('practice-toggle-label');
+        const angleSumQuiz = document.getElementById('angle-sum-quiz');
+        const pythagoreanQuiz = document.getElementById('pythagorean-quiz');
+        const SVG_NS = "http://www.w3.org/2000/svg";
 
-        // --- 導覽列切換邏輯 ---
         function switchModule(targetModule) {
             Object.keys(modules).forEach(key => {
                 modules[key].classList.remove('active');
@@ -426,8 +474,16 @@
             });
             modules[targetModule].classList.add('active');
             navButtons[targetModule].classList.add('active');
-        }
 
+            // 同步切換測驗題組
+            angleSumQuiz.classList.remove('active');
+            pythagoreanQuiz.classList.remove('active');
+            if (targetModule === 'angleSum') {
+                angleSumQuiz.classList.add('active');
+            } else if (targetModule === 'pythagorean') {
+                pythagoreanQuiz.classList.add('active');
+            }
+        }
         navButtons.angleSum.addEventListener('click', () => switchModule('angleSum'));
         navButtons.pythagorean.addEventListener('click', () => switchModule('pythagorean'));
 
@@ -438,331 +494,188 @@
         const angleA_disp = document.getElementById('angle-a');
         const angleB_disp = document.getElementById('angle-b');
         const angleC_disp = document.getElementById('angle-c');
-        const unfoldBtn = document.getElementById('unfold-angles-btn');
-        const SVG_NS = "http://www.w3.org/2000/svg";
-
+        
         let vertices = [
-            { x: 100, y: 300, id: 'B' },
-            { x: 400, y: 300, id: 'C' },
-            { x: 250, y: 100, id: 'A' }
+            { x: 100, y: 300, id: 'B' }, { x: 400, y: 300, id: 'C' }, { x: 250, y: 100, id: 'A' }
         ];
         let draggedVertex = null;
-        let isUnfolded = false;
 
-        function getDistance(p1, p2) {
-            return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
-        }
-
-        function getAngle(p1, p2, p3) { // Angle at p2
-            const a = getDistance(p2, p3);
-            const b = getDistance(p1, p3);
-            const c = getDistance(p1, p2);
+        function getDistance(p1, p2) { return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2)); }
+        function getAngle(p1, p2, p3) {
+            const a = getDistance(p2, p3); const b = getDistance(p1, p3); const c = getDistance(p1, p2);
             return Math.acos((a * a + c * c - b * b) / (2 * a * c)) * (180 / Math.PI);
         }
-
         function createSVGElement(tag, attributes) {
             const el = document.createElementNS(SVG_NS, tag);
-            for (let key in attributes) {
-                el.setAttribute(key, attributes[key]);
-            }
+            for (let key in attributes) el.setAttribute(key, attributes[key]);
             return el;
         }
 
         function drawAngleSum() {
-            angleSumSVG.innerHTML = ''; // 清空 SVG
-
+            angleSumSVG.innerHTML = '';
             const [pB, pC, pA] = vertices;
+            const angleA = getAngle(pB, pA, pC); const angleB = getAngle(pA, pB, pC); const angleC = getAngle(pB, pC, pA);
             
-            // 計算角度
-            const angleA = getAngle(pB, pA, pC);
-            const angleB = getAngle(pA, pB, pC);
-            const angleC = getAngle(pB, pC, pA);
-
-            // 繪製三角形
-            const triangle = createSVGElement('polygon', {
-                points: `${pA.x},${pA.y} ${pB.x},${pB.y} ${pC.x},${pC.y}`,
-                class: 'triangle-shape'
-            });
+            const triangle = createSVGElement('polygon', { points: `${pA.x},${pA.y} ${pB.x},${pB.y} ${pC.x},${pC.y}`, class: 'triangle-shape' });
             angleSumSVG.appendChild(triangle);
             
-            // 繪製角度弧線
-            function drawAngleArc(center, p1, p2, radius, color, id) {
+            function drawAngleArc(center, p1, p2, radius, color) {
                 const angle = getAngle(p1, center, p2);
-                const startAngle = Math.atan2(p1.y - center.y, p1.x - center.x);
-                const endAngle = Math.atan2(p2.y - center.y, p2.x - center.x);
-                
-                const start = {
-                    x: center.x + radius * Math.cos(startAngle),
-                    y: center.y + radius * Math.sin(startAngle)
-                };
-                const end = {
-                    x: center.x + radius * Math.cos(endAngle),
-                    y: center.y + radius * Math.sin(endAngle)
-                };
-                
-                const largeArcFlag = angle > 180 ? 1 : 0;
-                // 判斷順時針或逆時針
-                let sweepFlag = (endAngle > startAngle) ? 1 : 0;
-                if(Math.abs(endAngle-startAngle) > Math.PI) sweepFlag = 1 - sweepFlag;
+                const startAngleRad = Math.atan2(p1.y - center.y, p1.x - center.x);
+                const endAngleRad = Math.atan2(p2.y - center.y, p2.x - center.x);
+                const start = { x: center.x + radius * Math.cos(startAngleRad), y: center.y + radius * Math.sin(startAngleRad) };
+                const end = { x: center.x + radius * Math.cos(endAngleRad), y: center.y + radius * Math.sin(endAngleRad) };
+                let largeArcFlag = angle > 180 ? 1 : 0;
+                let sweepFlag = endAngleRad > startAngleRad ? 1 : 0;
+                 if(Math.abs(endAngleRad - startAngleRad) > Math.PI) sweepFlag = 1 - sweepFlag;
 
                 const d = `M ${center.x} ${center.y} L ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArcFlag} ${sweepFlag} ${end.x} ${end.y} Z`;
-                const arc = createSVGElement('path', { d: d, class: 'angle-arc', style: `fill: ${color}`, id: id });
-                angleSumSVG.appendChild(arc);
-                return arc;
+                return createSVGElement('path', { d: d, class: 'angle-arc', style: `fill: ${color}` });
             }
 
-            const arcA = drawAngleArc(pA, pB, pC, 40, 'rgba(255, 99, 132, 0.5)', 'arcA');
-            const arcB = drawAngleArc(pB, pC, pA, 40, 'rgba(54, 162, 235, 0.5)', 'arcB');
-            const arcC = drawAngleArc(pC, pA, pB, 40, 'rgba(255, 206, 86, 0.5)', 'arcC');
+            const arcA = drawAngleArc(pA, pB, pC, 40, 'rgba(220, 53, 69, 0.6)');
+            const arcB = drawAngleArc(pB, pC, pA, 40, 'rgba(40, 167, 69, 0.6)');
+            const arcC = drawAngleArc(pC, pA, pB, 40, 'rgba(255, 193, 7, 0.6)');
+            angleSumSVG.append(arcA, arcB, arcC);
             
-            if (isUnfolded) {
-                const unfoldBaseY = 350;
-                const unfoldBaseX = 150;
-                arcB.setAttribute('transform', `translate(${unfoldBaseX - pB.x}, ${unfoldBaseY - pB.y})`);
-                
-                const angleB_rad = angleB * Math.PI / 180;
-                const transformA = `translate(${unfoldBaseX - pA.x + 40}, ${unfoldBaseY - pA.y}) rotate(${-angleB}, ${pA.x}, ${pA.y})`;
-                arcA.setAttribute('transform', `translate(${unfoldBaseX - pB.x}, ${unfoldBaseY-pB.y}) rotate(${angleC}, ${pB.x}, ${pB.y})`);
-                
-                const angleC_rad = angleC * Math.PI / 180;
-                arcC.setAttribute('transform', `translate(${unfoldBaseX - pC.x}, ${unfoldBaseY-pC.y}) rotate(${-angleB}, ${pC.x}, ${pC.y})`);
-            
-                const totalRotationB = getAngle(pA, pB, pC);
-                const transformStringB = `translate(${unfoldBaseX-pB.x}, ${unfoldBaseY-pB.y})`;
-
-                const totalRotationA = getAngle(pA, pB, pC) + getAngle(pB,pC,pA);
-                const transformStringA = `translate(${unfoldBaseX-pA.x}, ${unfoldBaseY-pA.y}) rotate(${totalRotationB}, ${pA.x}, ${pA.y})`;
-
-                // This part is complex. Let's simplify the unfolding visualization.
-                // We'll place arcs side by side.
-                const unfoldY = 350;
-                const unfoldStartX = 150;
-                
-                const angleBrad = angleB * Math.PI / 180;
-                const angleCrad = angleC * Math.PI / 180;
-                
-                // Position B at start
-                arcB.setAttribute('transform', `translate(${unfoldStartX - pB.x}, ${unfoldY - pB.y})`);
-
-                // Position C next to B, rotated by angle B
-                arcC.setAttribute('transform', `translate(${unfoldStartX - pC.x}, ${unfoldY - pC.y}) rotate(${-angleB}, ${pC.x}, ${pC.y})`);
-
-                // Position A next to C, rotated by angle B+C
-                arcA.setAttribute('transform', `translate(${unfoldStartX - pA.x}, ${unfoldY - pA.y}) rotate(${angleC-180}, ${pA.x}, ${pA.y})`);
-
-                // A simpler, more robust unfolding by just setting transforms
-                arcB.setAttribute('transform', `translate(${250-pB.x}, ${350-pB.y}) rotate(0)`);
-                arcC.setAttribute('transform', `translate(${250-pC.x}, ${350-pC.y}) rotate(${-angleB}, ${pC.x}, ${pC.y})`);
-                arcA.setAttribute('transform', `translate(${250-pA.x}, ${350-pA.y}) rotate(${180 - angleA}, ${pA.x}, ${pA.y})`);
-                
-                triangle.style.opacity = '0.1'; // Fade out triangle
-            }
-
-
-            // 繪製頂點和標籤
             vertices.forEach((v, i) => {
-                const handle = createSVGElement('circle', {
-                    cx: v.x, cy: v.y, r: 8, class: 'draggable-point', 'data-index': i
-                });
+                const handle = createSVGElement('circle', { cx: v.x, cy: v.y, r: 8, class: 'draggable-point', 'data-index': i });
                 angleSumSVG.appendChild(handle);
-                
-                const label = createSVGElement('text', {
-                    x: v.x + 10, y: v.y - 10, class: 'vertex-label'
-                });
+                const label = createSVGElement('text', { x: v.x + 15, y: v.y > 350 ? v.y - 15 : v.y + 5, class: 'vertex-label' });
                 label.textContent = v.id;
                 angleSumSVG.appendChild(label);
             });
 
-            // 更新顯示數值
             angleA_disp.textContent = angleA.toFixed(1) + '°';
             angleB_disp.textContent = angleB.toFixed(1) + '°';
             angleC_disp.textContent = angleC.toFixed(1) + '°';
         }
 
-        angleSumSVG.addEventListener('mousedown', (e) => {
-            if (e.target.classList.contains('draggable-point')) {
-                draggedVertex = vertices[e.target.dataset.index];
-            }
-        });
-
+        angleSumSVG.addEventListener('mousedown', (e) => { if (e.target.classList.contains('draggable-point')) { draggedVertex = vertices[e.target.dataset.index]; } });
         angleSumSVG.addEventListener('mousemove', (e) => {
             if (draggedVertex) {
-                const pt = angleSumSVG.createSVGPoint();
-                pt.x = e.clientX;
-                pt.y = e.clientY;
+                const pt = angleSumSVG.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
                 const svgP = pt.matrixTransform(angleSumSVG.getScreenCTM().inverse());
-                draggedVertex.x = Math.max(0, Math.min(500, svgP.x));
-                draggedVertex.y = Math.max(0, Math.min(400, svgP.y));
-                isUnfolded = false; // Dragging resets unfolding
-                unfoldBtn.textContent = '展開三角形角度';
+                draggedVertex.x = Math.max(10, Math.min(490, svgP.x));
+                draggedVertex.y = Math.max(10, Math.min(390, svgP.y));
                 drawAngleSum();
             }
         });
-
-        angleSumSVG.addEventListener('mouseup', () => {
-            draggedVertex = null;
-        });
-        angleSumSVG.addEventListener('mouseleave', () => {
-            draggedVertex = null;
-        });
-        
-        unfoldBtn.addEventListener('click', () => {
-            isUnfolded = !isUnfolded;
-            unfoldBtn.textContent = isUnfolded ? '重設為三角形' : '展開三角形角度';
-            drawAngleSum();
-        });
-
+        angleSumSVG.addEventListener('mouseup', () => { draggedVertex = null; });
+        angleSumSVG.addEventListener('mouseleave', () => { draggedVertex = null; });
 
         // ==========================================================
         // --- 模組二：畢氏定理 (Pythagorean Theorem) ---
         // ==========================================================
         const pythagoreanSVG = document.getElementById('pythagorean-svg');
-        let pythagoreanPoints = {
-            C: { x: 100, y: 300 }, // Right angle corner, fixed
-            A: { x: 100, y: 150 }, // Draggable vertically
-            B: { x: 250, y: 300 }  // Draggable horizontally
-        };
+        let pythagoreanPoints = { C: { x: 250, y: 250 }, A: { x: 250, y: 100 }, B: { x: 400, y: 250 } };
         let draggedPythagoreanPoint = null;
 
         function drawPythagorean() {
             pythagoreanSVG.innerHTML = '';
-            
             const { C, A, B } = pythagoreanPoints;
-            const a = B.x - C.x; // length of side a
-            const b = C.y - A.y; // length of side b
-            const c = Math.sqrt(a * a + b * b);
+            const a = B.x - C.x, b = C.y - A.y, c = Math.sqrt(a * a + b * b);
+            
+            function createLabel(x, y, text) {
+                const label = createSVGElement('text', { x, y, class: 'square-label' });
+                label.textContent = text;
+                return label;
+            }
 
-            // 繪製三個正方形
-            // Square a (on side BC)
-            const sq_a = createSVGElement('polygon', {
-                points: `${B.x},${B.y} ${C.x},${C.y} ${C.x},${C.y + a} ${B.x},${B.y + a}`,
-                class: 'square-a'
-            });
-            pythagoreanSVG.appendChild(sq_a);
+            const sq_a = createSVGElement('polygon', { points: `${B.x},${B.y} ${C.x},${C.y} ${C.x},${C.y + a} ${B.x},${B.y + a}`, class: 'square-a' });
+            const sq_b = createSVGElement('polygon', { points: `${A.x},${A.y} ${C.x},${C.y} ${C.x - b},${C.y} ${A.x - b},${A.y}`, class: 'square-b' });
+            const sq_c = createSVGElement('polygon', { points: `${A.x},${A.y} ${B.x},${B.y} ${B.x - b},${B.y + a} ${A.x - b},${A.y + a}`, class: 'square-c' });
+            const label_a = createLabel(C.x + a / 2, C.y + a / 2, 'a²');
+            const label_b = createLabel(C.x - b / 2, C.y - b / 2, 'b²');
+            const label_c = createLabel(A.x + (B.x-A.x)/2 - b/2, A.y + (B.y-A.y)/2 + a/2, 'c²');
+            pythagoreanSVG.append(sq_a, sq_b, sq_c, label_a, label_b, label_c);
 
-            // Square b (on side AC)
-            const sq_b = createSVGElement('polygon', {
-                points: `${A.x},${A.y} ${C.x},${C.y} ${C.x - b},${C.y} ${A.x - b},${A.y}`,
-                class: 'square-b'
-            });
-            pythagoreanSVG.appendChild(sq_b);
-
-            // Square c (on hypotenuse AB)
-            const sq_c = createSVGElement('polygon', {
-                points: `${A.x},${A.y} ${B.x},${B.y} ${B.x - b},${B.y + a} ${A.x - b},${A.y + a}`,
-                class: 'square-c'
-            });
-            pythagoreanSVG.appendChild(sq_c);
-
-            // 繪製三角形本體 (在最上層)
-            const triangle = createSVGElement('polygon', {
-                points: `${A.x},${A.y} ${B.x},${B.y} ${C.x},${C.y}`,
-                class: 'triangle-shape',
-                style: 'fill: rgba(255, 255, 255, 0.7);'
-            });
+            const triangle = createSVGElement('polygon', { points: `${A.x},${A.y} ${B.x},${B.y} ${C.x},${C.y}`, class: 'triangle-shape', style: 'fill: rgba(255, 255, 255, 0.8);' });
             pythagoreanSVG.appendChild(triangle);
 
-            // 繪製直角符號
-            const rightAngle = createSVGElement('polyline', {
-                points: `${C.x + 15},${C.y} ${C.x + 15},${C.y - 15} ${C.x},${C.y - 15}`,
-                class: 'right-angle-symbol'
-            });
+            const rightAngle = createSVGElement('polyline', { points: `${C.x},${C.y - 20} ${C.x + 20},${C.y - 20} ${C.x + 20},${C.y}`, class: 'right-angle-symbol' });
             pythagoreanSVG.appendChild(rightAngle);
 
-            // 繪製拖曳點和標籤
             ['A', 'B'].forEach(key => {
                 const p = pythagoreanPoints[key];
-                const handle = createSVGElement('circle', {
-                    cx: p.x, cy: p.y, r: 8, class: 'draggable-point', 'data-key': key
-                });
-                pythagoreanSVG.appendChild(handle);
-                
-                const label = createSVGElement('text', { x: p.x + 10, y: p.y - 10, class: 'vertex-label' });
+                const handle = createSVGElement('circle', { cx: p.x, cy: p.y, r: 8, class: 'draggable-point', 'data-key': key });
+                const label = createSVGElement('text', { x: p.x, y: p.y - 15, class: 'vertex-label', 'text-anchor': 'middle' });
                 label.textContent = key;
-                pythagoreanSVG.appendChild(label);
+                pythagoreanSVG.append(handle, label);
             });
-             const cLabel = createSVGElement('text', { x: C.x - 20, y: C.y - 10, class: 'vertex-label' });
+             const cLabel = createSVGElement('text', { x: C.x - 20, y: C.y + 20, class: 'vertex-label' });
              cLabel.textContent = 'C';
              pythagoreanSVG.appendChild(cLabel);
 
-            // 更新顯示數值
-            document.getElementById('side-a').textContent = (a / 50).toFixed(2); // Scale for display
-            document.getElementById('side-b').textContent = (b / 50).toFixed(2);
-            document.getElementById('side-c').textContent = (c / 50).toFixed(2);
-
-            const area_a_val = Math.pow(a / 50, 2);
-            const area_b_val = Math.pow(b / 50, 2);
-            const area_c_val = Math.pow(c / 50, 2);
-
+            const scale = 50;
+            document.getElementById('side-a').textContent = (a / scale).toFixed(2);
+            document.getElementById('side-b').textContent = (b / scale).toFixed(2);
+            document.getElementById('side-c').textContent = (c / scale).toFixed(2);
+            const area_a_val = Math.pow(a / scale, 2), area_b_val = Math.pow(b / scale, 2), area_c_val = Math.pow(c / scale, 2);
             document.getElementById('area-a').textContent = area_a_val.toFixed(2);
             document.getElementById('area-b').textContent = area_b_val.toFixed(2);
             document.getElementById('area-a-plus-b').textContent = (area_a_val + area_b_val).toFixed(2);
             document.getElementById('area-c').textContent = area_c_val.toFixed(2);
         }
 
-        pythagoreanSVG.addEventListener('mousedown', (e) => {
-            if (e.target.classList.contains('draggable-point')) {
-                draggedPythagoreanPoint = e.target.dataset.key;
-            }
-        });
-        
+        pythagoreanSVG.addEventListener('mousedown', (e) => { if (e.target.classList.contains('draggable-point')) { draggedPythagoreanPoint = e.target.dataset.key; } });
         pythagoreanSVG.addEventListener('mousemove', (e) => {
             if (draggedPythagoreanPoint) {
-                const pt = pythagoreanSVG.createSVGPoint();
-                pt.x = e.clientX;
-                pt.y = e.clientY;
+                const pt = pythagoreanSVG.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
                 const svgP = pt.matrixTransform(pythagoreanSVG.getScreenCTM().inverse());
-                
-                if (draggedPythagoreanPoint === 'A') {
-                    pythagoreanPoints.A.y = Math.max(20, Math.min(pythagoreanPoints.C.y - 20, svgP.y));
-                } else if (draggedPythagoreanPoint === 'B') {
-                    pythagoreanPoints.B.x = Math.max(pythagoreanPoints.C.x + 20, Math.min(480, svgP.x));
-                }
+                if (draggedPythagoreanPoint === 'A') { pythagoreanPoints.A.y = Math.max(20, Math.min(pythagoreanPoints.C.y - 20, svgP.y)); } 
+                else if (draggedPythagoreanPoint === 'B') { pythagoreanPoints.B.x = Math.max(pythagoreanPoints.C.x + 20, Math.min(480, svgP.x)); }
                 drawPythagorean();
             }
         });
-
         pythagoreanSVG.addEventListener('mouseup', () => { draggedPythagoreanPoint = null; });
         pythagoreanSVG.addEventListener('mouseleave', () => { draggedPythagoreanPoint = null; });
         
         // ==========================================================
         // --- 模組三：練習模式 (Practice Mode) ---
         // ==========================================================
-        const practiceToggle = document.getElementById('practice-toggle');
-        const practiceArea = document.getElementById('practice-area');
-        
         practiceToggle.addEventListener('change', (e) => {
-            if (e.target.checked) {
-                practiceArea.style.display = 'block';
-            } else {
-                practiceArea.style.display = 'none';
+            practiceArea.style.display = e.target.checked ? 'block' : 'none';
+            practiceToggleLabel.textContent = e.target.checked ? '關閉練習模式' : '開啟練習模式';
+            if (!e.target.checked) {
+                document.querySelectorAll('.question-options button').forEach(btn => btn.classList.remove('selected', 'correct', 'incorrect'));
+                document.querySelectorAll('.feedback').forEach(fb => { fb.style.display = 'none'; fb.textContent = ''; });
             }
         });
         
-        function handleQuestionFeedback(questionId, optionsContainerId, isCorrect, feedbackText) {
+        function handleQuestionFeedback(questionId, optionsContainerId) {
             const feedbackEl = document.getElementById(`${questionId}-feedback`);
-            feedbackEl.textContent = '';
-            
-            const options = document.querySelectorAll(`#${optionsContainerId} button`);
-            options.forEach(btn => {
-                btn.onclick = (e) => {
-                    const selectedCorrect = e.target.dataset.answer === 'correct';
-                    if (selectedCorrect) {
+            const optionsContainer = document.getElementById(optionsContainerId);
+            const buttons = optionsContainer.querySelectorAll('button');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    buttons.forEach(b => b.classList.remove('selected', 'correct', 'incorrect'));
+                    const selectedBtn = e.target;
+                    selectedBtn.classList.add('selected');
+                    const isCorrect = selectedBtn.dataset.answer === 'correct';
+                    if (isCorrect) {
                         feedbackEl.textContent = '✅ 答對了！非常棒！';
                         feedbackEl.className = 'feedback correct';
+                        selectedBtn.classList.add('correct');
                     } else {
                         let incorrectFeedback = '❌ 不對喔。';
-                        if (questionId === 'q1') incorrectFeedback += '提示：檢查是否滿足 a² + b² = c²。';
-                        if (questionId === 'q2') incorrectFeedback += '提示：三角形內角和必須等於 180°。50+60+80 = 190。';
+                        if (questionId === 'q_as1') incorrectFeedback += '提示：三個內角總和是 180°。180 - 70 - 30 = ?';
+                        if (questionId === 'q_as2') incorrectFeedback += '提示：加總看看哪一組不等於 180°。';
+                        if (questionId === 'q_py1') incorrectFeedback += '提示：檢查是否滿足 a² + b² = c²。';
+                        if (questionId === 'q_py2') incorrectFeedback += '提示：計算 6² + 8² 的平方根。';
                         feedbackEl.textContent = incorrectFeedback;
                         feedbackEl.className = 'feedback incorrect';
+                        selectedBtn.classList.add('incorrect');
+                        optionsContainer.querySelector('button[data-answer="correct"]').classList.add('correct');
                     }
-                };
+                });
             });
         }
         
-        handleQuestionFeedback('q1', 'q1-options');
-        handleQuestionFeedback('q2', 'q2-options');
+        handleQuestionFeedback('q_as1', 'q_as1-options');
+        handleQuestionFeedback('q_as2', 'q_as2-options');
+        handleQuestionFeedback('q_py1', 'q_py1-options');
+        handleQuestionFeedback('q_py2', 'q_py2-options');
 
         // --- 初始繪製 ---
         drawAngleSum();
